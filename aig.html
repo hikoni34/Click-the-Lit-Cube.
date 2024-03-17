@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Click the Lit Cube</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        overflow: hidden;
+        background-color: #ccc; /* Set background color to gray */
+    }
+    #gameBoard {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 50px;
+    }
+    .cube {
+        width: 80px;
+        height: 80px;
+        margin: 10px;
+        background-color: #888;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .lit {
+        background-color: #f00;
+    }
+    #score {
+        font-size: 24px;
+        margin-top: 20px;
+    }
+    #timerBar {
+        width: 100%;
+        height: 30px;
+        background-color: #ddd;
+        margin-top: 20px;
+        position: relative;
+    }
+    #timerText {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 16px;
+    }
+    #timerBarFill {
+        height: 100%;
+        background-color: #f00;
+        transition: width linear;
+    }
+    #startMenu {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+        background-color: #fff;
+        border: 2px solid #000;
+    }
+    #startMenu label {
+        display: block;
+        margin-bottom: 10px;
+    }
+    #startMenu button {
+        margin-top: 10px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<h1>Click the Lit Cube</h1>
+
+<div id="gameBoard"></div>
+
+<div id="score">Score: <span id="scoreValue">0</span></div>
+
+<div id="timerBar">
+    <div id="timerText">60</div>
+    <div id="timerBarFill"></div>
+</div>
+
+<div id="startMenu">
+    <h2>Game Settings</h2>
+    <label for="cubeCount">Number of Cubes:</label>
+    <input type="number" id="cubeCount" min="3" max="30" value="9">
+    <br>
+    <label for="timer">Timer (seconds):</label>
+    <input type="number" id="timer" min="10" max="300" value="60">
+    <br>
+    <button id="startGameButton" class="button">Start Game</button>
+</div>
+
+<button id="startButton" class="button">Start Game</button>
+
+<script>
+    const gameBoard = document.getElementById("gameBoard");
+    const scoreElement = document.getElementById("scoreValue");
+    const startMenu = document.getElementById("startMenu");
+    const startButton = document.getElementById("startButton");
+    const cubeCountInput = document.getElementById("cubeCount");
+    const timerInput = document.getElementById("timer");
+    const timerBarFill = document.getElementById("timerBarFill");
+    const timerText = document.getElementById("timerText");
+
+    let score = 0;
+    let cubeCount = 9;
+    let timerDuration = 60; // 60 seconds
+    let gameTimer;
+
+    // Create cubes
+    function createCubes() {
+        gameBoard.innerHTML = "";
+        for (let i = 0; i < cubeCount; i++) {
+            const cube = document.createElement("div");
+            cube.classList.add("cube");
+            cube.addEventListener("click", () => checkCube(cube));
+            gameBoard.appendChild(cube);
+        }
+    }
+
+    // Function to randomly light up a cube
+    function lightUpRandomCube() {
+        const cubes = document.querySelectorAll(".cube");
+        cubes.forEach(cube => cube.classList.remove("lit"));
+        const randomIndex = Math.floor(Math.random() * cubeCount);
+        cubes[randomIndex].classList.add("lit");
+    }
+
+    // Function to check if the clicked cube is lit
+    function checkCube(cube) {
+        if (cube.classList.contains("lit")) {
+            score++;
+            scoreElement.textContent = score;
+            lightUpRandomCube(); // Light up another cube after scoring
+        } else {
+            endGame();
+        }
+    }
+
+    // Show start menu
+    function showStartMenu() {
+        startMenu.style.display = "block";
+    }
+
+    // Hide start menu
+    function hideStartMenu() {
+        startMenu.style.display = "none";
+    }
+
+    // Start button event listener
+    startButton.addEventListener("click", showStartMenu);
+
+    // Start game button event listener
+    startGameButton.addEventListener("click", () => {
+        cubeCount = parseInt(cubeCountInput.value);
+        timerDuration = parseInt(timerInput.value);
+        hideStartMenu();
+        startGame();
+    });
+
+    // Start game
+    function startGame() {
+        score = 0;
+        scoreElement.textContent = score;
+        createCubes();
+        lightUpRandomCube();
+        startTimer();
+    }
+
+    // Start timer
+    function startTimer() {
+        let timeLeft = timerDuration;
+        timerBarFill.style.width = "100%";
+        timerText.textContent = timerDuration;
+        gameTimer = setInterval(() => {
+            timeLeft--;
+            const progress = (timeLeft / timerDuration) * 100;
+            timerBarFill.style.width = progress + "%";
+            timerText.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
+
+    // End game
+    function endGame() {
+        clearInterval(gameTimer);
+        alert("Game Over! Your score: " + score);
+        showStartMenu();
+    }
+</script>
+
+</body>
+</html>
